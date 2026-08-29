@@ -3563,6 +3563,20 @@ sensors,
 );
 
 </script>
-
+  
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .then(() => {
+        console.log("MHB Service Worker ativo");
+      })
+      .catch(error => {
+        console.error("Erro ao ativar Service Worker:", error);
+      });
+  });
+}
+</script>
+  
 </body>
 </html>
