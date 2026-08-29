@@ -1,0 +1,3567 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MHB Audio System</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+:root{
+  --bg:#f5f6fa;
+  --card:#ffffff;
+  --text:#151722;
+  --muted:#7b8090;
+  --primary:#5865f2;
+  --secondary:#8b5cf6;
+  --green:#20b26b;
+  --yellow:#f2a900;
+  --red:#e5484d;
+  --border:#e7e8ef;
+}
+
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  background:
+    radial-gradient(circle at 80% 0%,#ebe8ff 0,transparent 30%),
+    var(--bg);
+  color:var(--text);
+  min-height:100vh;
+}
+
+button,input{
+  font-family:inherit;
+}
+
+.app{
+  width:100%;
+  max-width:480px;
+  margin:auto;
+  min-height:100vh;
+  padding-bottom:90px;
+}
+
+.header{
+  padding:25px 20px 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.header h1{
+  font-size:25px;
+}
+
+.subtitle{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:5px;
+}
+
+.status{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  color:var(--green);
+  font-size:11px;
+  font-weight:bold;
+  margin-top:6px;
+}
+
+.dot{
+  width:8px;
+  height:8px;
+  background:var(--green);
+  border-radius:50%;
+  box-shadow:0 0 9px rgba(32,178,107,.6);
+}
+
+.page{
+  display:none;
+  padding:0 18px 25px;
+}
+
+.page.active{
+  display:block;
+  animation:pageIn .28s ease;
+}
+
+@keyframes pageIn{
+  from{
+    opacity:0;
+    transform:translateY(8px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.card{
+  background:rgba(255,255,255,.96);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:19px;
+  margin-bottom:14px;
+  box-shadow:0 8px 30px rgba(35,40,70,.05);
+}
+
+.card-title{
+  font-size:16px;
+  font-weight:800;
+}
+
+.card-subtitle{
+  color:var(--muted);
+  font-size:11px;
+  margin-top:5px;
+}
+
+/* HERO */
+
+.hero{
+  min-height:230px;
+  background:
+    radial-gradient(circle at 75% 20%,rgba(139,92,246,.16),transparent 30%),
+    linear-gradient(135deg,#fff,#f0efff);
+  overflow:hidden;
+}
+
+.hero-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.logo{
+  font-size:11px;
+  letter-spacing:3px;
+  font-weight:900;
+}
+
+.chip{
+  background:#fff;
+  border:1px solid var(--border);
+  padding:7px 11px;
+  border-radius:20px;
+  font-size:9px;
+  font-weight:bold;
+}
+
+.hero-mini{
+  display:flex;
+  gap:12px;
+  margin-top:10px;
+  font-size:10px;
+  color:#555a68;
+}
+
+.hero-mini span{
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+
+.hero-speaker{
+  height:130px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.speaker{
+  width:112px;
+  height:112px;
+  border-radius:30px;
+  background:linear-gradient(145deg,#222531,#0d0f16);
+  box-shadow:
+    0 20px 35px rgba(20,20,30,.24),
+    inset 0 0 0 2px rgba(255,255,255,.05);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  position:relative;
+  transition:.3s;
+}
+
+.speaker:before{
+  content:"";
+  width:70px;
+  height:70px;
+  border-radius:50%;
+  background:
+    radial-gradient(
+      circle,
+      #292d3a 0 18%,
+      #101219 20% 48%,
+      #3b3f4d 50% 53%,
+      #11131a 55%
+    );
+}
+
+.speaker:after{
+  content:"MHB";
+  position:absolute;
+  bottom:9px;
+  font-size:7px;
+  color:#aaa;
+  letter-spacing:2px;
+}
+
+.hero-bottom{
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+}
+
+.device-name{
+  font-size:14px;
+  font-weight:900;
+}
+
+.device-model{
+  font-size:10px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+.version{
+  background:#eff0ff;
+  color:var(--primary);
+  padding:7px 10px;
+  border-radius:20px;
+  font-size:9px;
+  font-weight:bold;
+}
+
+/* BOTÕES */
+
+.power-main{
+  width:100%;
+  padding:17px;
+  border:none;
+  border-radius:18px;
+  color:#fff;
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  font-size:14px;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 9px 25px rgba(88,101,242,.20);
+  transition:.2s;
+}
+
+.power-main:hover{
+  transform:translateY(-2px);
+}
+
+.power-main:active{
+  transform:scale(.98);
+}
+
+.power-main.standby{
+  background:#252832;
+}
+
+.secondary-btn{
+  width:100%;
+  padding:14px;
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:#fff;
+  color:var(--text);
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.secondary-btn:hover{
+  background:#f5f5fb;
+  transform:translateY(-1px);
+}
+
+/* RANGE */
+
+input[type=range]{
+  width:100%;
+  accent-color:var(--primary);
+  cursor:pointer;
+}
+
+/* GRID */
+
+.grid2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.metric{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:21px;
+  padding:17px;
+}
+
+.metric-icon{
+  font-size:20px;
+  margin-bottom:11px;
+}
+
+.metric-name{
+  color:var(--muted);
+  font-size:10px;
+}
+
+.metric-value{
+  font-size:21px;
+  font-weight:900;
+  margin-top:4px;
+}
+
+.metric-extra{
+  color:var(--muted);
+  font-size:9px;
+  margin-top:5px;
+}
+
+.green{color:var(--green)}
+.yellow{color:var(--yellow)}
+.red{color:var(--red)}
+.blue{color:var(--primary)}
+
+/* SOM */
+
+.preset{
+  display:flex;
+  align-items:center;
+  gap:13px;
+  padding:15px;
+  margin-bottom:9px;
+  border:1px solid var(--border);
+  border-radius:19px;
+  background:#fff;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.preset:hover{
+  transform:translateX(3px);
+}
+
+.preset.active{
+  border-color:var(--primary);
+  background:#f0f1ff;
+  box-shadow:0 7px 20px rgba(88,101,242,.08);
+}
+
+.preset-icon{
+  width:43px;
+  height:43px;
+  display:grid;
+  place-items:center;
+  border-radius:13px;
+  background:#eff0ff;
+  font-size:19px;
+}
+
+.preset-text{
+  flex:1;
+}
+
+.preset-name{
+  font-size:12px;
+  font-weight:900;
+}
+
+.preset-desc{
+  color:var(--muted);
+  font-size:10px;
+  margin-top:4px;
+}
+
+.check{
+  color:var(--primary);
+  font-weight:900;
+}
+
+/* EQUALIZADOR */
+
+.eq{
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  height:185px;
+  padding:20px 2px 0;
+}
+
+.eq-band{
+  width:12%;
+  height:165px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:end;
+  color:var(--muted);
+  font-size:8px;
+}
+
+.eq-slider{
+  height:135px;
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.eq-slider input{
+  width:125px;
+  transform:rotate(-90deg);
+  accent-color:var(--primary);
+}
+
+.eq-value{
+  font-size:8px;
+  color:var(--primary);
+  font-weight:bold;
+  margin-bottom:3px;
+}
+
+/* BALANCE */
+
+.balance-wrap{
+  margin-top:22px;
+}
+
+.balance-track{
+  position:relative;
+  height:8px;
+  border-radius:10px;
+  background:
+    linear-gradient(
+      90deg,
+      #8b5cf6 0%,
+      #c8c9d2 45%,
+      #c8c9d2 55%,
+      #5865f2 100%
+    );
+}
+
+.balance-track:after{
+  content:"";
+  position:absolute;
+  width:2px;
+  height:18px;
+  left:50%;
+  top:-5px;
+  background:#999;
+}
+
+.balance-slider{
+  position:absolute;
+  top:-9px;
+  left:0;
+  width:100%;
+  height:25px;
+  opacity:0;
+}
+
+.balance-knob{
+  position:absolute;
+  top:-9px;
+  left:50%;
+  transform:translateX(-50%);
+  width:25px;
+  height:25px;
+  border-radius:50%;
+  background:white;
+  border:3px solid var(--primary);
+  box-shadow:0 4px 12px rgba(88,101,242,.25);
+  pointer-events:none;
+  transition:.12s;
+}
+
+.balance-labels{
+  display:flex;
+  justify-content:space-between;
+  margin-top:13px;
+  color:var(--muted);
+  font-size:10px;
+}
+
+.balance-center{
+  text-align:center;
+  margin-top:10px;
+  font-size:11px;
+  font-weight:900;
+  color:var(--primary);
+}
+
+/* ENERGIA */
+
+.battery-big{
+  text-align:center;
+}
+
+.battery-icon{
+  font-size:48px;
+  margin-bottom:4px;
+}
+
+.battery-percent{
+  font-size:45px;
+  font-weight:900;
+}
+
+.progress{
+  height:9px;
+  border-radius:20px;
+  background:#e8e9ee;
+  overflow:hidden;
+  margin:18px 0 10px;
+}
+
+.progress-fill{
+  height:100%;
+  width:82%;
+  border-radius:20px;
+  background:var(--green);
+  transition:.5s;
+}
+
+.autonomy{
+  font-size:12px;
+  color:var(--muted);
+}
+
+.autonomy strong{
+  color:var(--text);
+  display:block;
+  font-size:18px;
+  margin-top:4px;
+}
+
+.power-mode{
+  display:flex;
+  align-items:center;
+  gap:13px;
+  padding:15px;
+  border:1px solid var(--border);
+  border-radius:19px;
+  margin-bottom:9px;
+  background:#fff;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.power-mode:hover{
+  transform:translateX(3px);
+}
+
+.power-mode.active{
+  border-color:var(--primary);
+  background:#f0f1ff;
+}
+
+.power-icon{
+  width:43px;
+  height:43px;
+  display:grid;
+  place-items:center;
+  background:#eff0ff;
+  border-radius:13px;
+}
+
+/* MONITOR */
+
+.health{
+  text-align:center;
+}
+
+.health-icon{
+  font-size:45px;
+  margin-bottom:8px;
+}
+
+.health-title{
+  font-size:17px;
+  font-weight:900;
+}
+
+.graph{
+  height:190px;
+  position:relative;
+  margin:25px 5px 15px 42px;
+  border-left:1px solid #ddd;
+  border-bottom:1px solid #ddd;
+}
+
+.graph-line{
+  position:absolute;
+  left:-1px;
+  right:0;
+  top:25%;
+  height:1px;
+  background:#e8e8ee;
+}
+
+.graph-line.l2{
+  top:50%;
+}
+
+.graph-line.l3{
+  top:75%;
+}
+
+.graph-label{
+  position:absolute;
+  left:-35px;
+  font-size:9px;
+  color:var(--muted);
+}
+
+.g70{top:-4px}
+.g60{top:25%}
+.g50{top:50%}
+.g40{top:75%}
+
+.graph svg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  overflow:visible;
+}
+
+#tempLine{
+  fill:none;
+  stroke:var(--primary);
+  stroke-width:3;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  transition:.7s;
+}
+
+.temp-point{
+  fill:white;
+  stroke:var(--primary);
+  stroke-width:2;
+}
+
+/* MAIS */
+
+.setting{
+  display:flex;
+  align-items:center;
+  padding:15px 0;
+  cursor:pointer;
+  transition:.15s;
+}
+
+.setting:hover{
+  transform:translateX(2px);
+}
+
+.setting-icon{
+  width:43px;
+  height:43px;
+  display:grid;
+  place-items:center;
+  background:#eff0ff;
+  border-radius:13px;
+  margin-right:13px;
+  font-size:18px;
+}
+
+.setting-text{
+  flex:1;
+}
+
+.setting-title{
+  font-size:13px;
+  font-weight:800;
+}
+
+.setting-sub{
+  color:var(--muted);
+  font-size:10px;
+  margin-top:4px;
+}
+
+.arrow{
+  font-size:21px;
+  color:#9a9dab;
+  transition:.2s;
+}
+
+.setting.open .arrow{
+  transform:rotate(90deg);
+  color:var(--primary);
+}
+
+.expand-panel{
+  display:none;
+  margin-top:0;
+  padding:16px;
+  background:#f7f7fc;
+  border:1px solid var(--border);
+  border-radius:19px;
+  animation:expand .25s ease;
+}
+
+.expand-panel.open{
+  display:block;
+}
+
+@keyframes expand{
+  from{
+    opacity:0;
+    transform:translateY(-5px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.connection-method{
+  display:flex;
+  align-items:center;
+  gap:13px;
+  padding:13px 0;
+  border-bottom:1px solid var(--border);
+}
+
+.connection-method:last-of-type{
+  border-bottom:none;
+}
+
+.connection-method-icon{
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  background:#eff0ff;
+  border-radius:13px;
+}
+
+.connection-info{
+  flex:1;
+}
+
+.connection-title{
+  font-size:12px;
+  font-weight:900;
+}
+
+.connection-sub{
+  color:var(--muted);
+  font-size:10px;
+  margin-top:4px;
+}
+
+.connection-state{
+  font-size:9px;
+  font-weight:900;
+}
+
+.search-box{
+  background:white;
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:13px;
+  margin:12px 0;
+}
+
+.search-device{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.search-device-icon{
+  width:40px;
+  height:40px;
+  display:grid;
+  place-items:center;
+  border-radius:12px;
+  background:#eff0ff;
+}
+
+.search-info{
+  flex:1;
+}
+
+.search-name{
+  font-size:12px;
+  font-weight:900;
+}
+
+.search-desc{
+  font-size:9px;
+  color:var(--muted);
+  margin-top:3px;
+}
+
+/* EQUIPAMENTO */
+
+.techs{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin:14px 0;
+}
+
+.tech{
+  background:#eff0ff;
+  color:#5360db;
+  padding:7px 10px;
+  border-radius:20px;
+  font-size:9px;
+  font-weight:bold;
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:11px 0;
+  border-bottom:1px solid var(--border);
+  font-size:10px;
+}
+
+.row:last-child{
+  border-bottom:none;
+}
+
+.row-value{
+  font-weight:800;
+}
+
+/* TOAST */
+
+.toast{
+  position:fixed;
+  top:18px;
+  left:50%;
+  transform:translate(-50%,-100px);
+  width:calc(100% - 40px);
+  max-width:440px;
+  padding:14px;
+  background:#20232e;
+  color:white;
+  border-radius:16px;
+  font-size:11px;
+  z-index:999;
+  transition:.35s;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+  text-align:center;
+}
+
+.toast.show{
+  transform:translate(-50%,0);
+}
+
+/* NAV */
+
+.nav{
+  position:fixed;
+  bottom:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:480px;
+  height:75px;
+  display:flex;
+  background:rgba(255,255,255,.96);
+  border-top:1px solid var(--border);
+  z-index:100;
+  backdrop-filter:blur(15px);
+}
+
+.nav-item{
+  flex:1;
+  border:none;
+  background:transparent;
+  color:#999dab;
+  font-size:9px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.nav-icon{
+  display:block;
+  font-size:20px;
+  margin-bottom:4px;
+}
+
+.nav-item.active{
+  color:var(--primary);
+  font-weight:bold;
+}
+
+@media(min-width:700px){
+
+body{
+  padding:25px;
+}
+
+.app{
+  min-height:850px;
+  border-radius:35px;
+  overflow:hidden;
+  background:rgba(247,248,252,.8);
+  box-shadow:0 25px 80px rgba(30,35,70,.15);
+}
+
+.nav{
+  border-radius:0 0 35px 35px;
+}
+
+}
+</style>
+</head>
+
+<body>
+
+<div class="toast" id="toast"></div>
+
+<div class="app">
+
+<!-- =====================================================
+INÍCIO
+===================================================== -->
+
+<section class="page active" id="home">
+
+<div class="header">
+
+<div>
+<h1>MHB-001</h1>
+
+<div class="status">
+<span class="dot"></span>
+<span id="connectionStatus">CONECTADO</span>
+</div>
+</div>
+
+<div>⚙️</div>
+
+</div>
+
+
+<div class="card hero">
+
+<div class="hero-top">
+
+<div class="logo">
+MHB AUDIO
+</div>
+
+<div class="chip" id="stateChip">
+ATIVO
+</div>
+
+</div>
+
+
+<div class="hero-mini">
+
+<span>🔥 <b id="homeTemp">42,3°C</b></span>
+
+<span>🔋 <b id="homeBattery">82%</b></span>
+
+</div>
+
+
+<div class="hero-speaker">
+
+<div class="speaker" id="speakerVisual"></div>
+
+</div>
+
+
+<div class="hero-bottom">
+
+<div>
+
+<div class="device-name">
+Caixinha de Alta Qualidade
+</div>
+
+<div class="device-model">
+MHB Audio System
+</div>
+
+</div>
+
+<span class="version">
+v1.0.0
+</span>
+
+</div>
+
+</div>
+
+
+<button
+class="power-main"
+id="powerButton"
+onclick="togglePower()">
+
+⏻ Colocar em Standby
+
+</button>
+
+
+<div class="card" style="margin-top:14px">
+
+<div class="card-title">
+Sistema de áudio
+</div>
+
+<div class="card-subtitle">
+Bluetooth • LDAC • Hi-Res
+</div>
+
+<div style="font-size:31px;font-weight:900;margin-top:14px">
+
+<span id="volumeValue">
+60
+</span>%
+
+</div>
+
+<input
+id="volume"
+type="range"
+min="0"
+max="100"
+value="60"
+oninput="changeVolume(this.value)"
+>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+SOM
+===================================================== -->
+
+<section class="page" id="sound">
+
+<div class="header">
+
+<div>
+<h1>Som</h1>
+
+<div class="subtitle">
+Experiência sonora MHB
+</div>
+
+</div>
+
+🎵
+
+</div>
+
+
+<div
+class="preset active"
+onclick="selectPreset(this,'PURE HI-FI')">
+
+<div class="preset-icon">✦</div>
+
+<div class="preset-text">
+
+<div class="preset-name">
+PURE HI-FI
+</div>
+
+<div class="preset-desc">
+Som natural, equilibrado e fiel.
+</div>
+
+</div>
+
+<div class="check">✓</div>
+
+</div>
+
+
+<div
+class="preset"
+onclick="selectPreset(this,'STUDIO')">
+
+<div class="preset-icon">🎚️</div>
+
+<div class="preset-text">
+
+<div class="preset-name">
+STUDIO
+</div>
+
+<div class="preset-desc">
+Clareza, definição e detalhes.
+</div>
+
+</div>
+
+</div>
+
+
+<div
+class="preset"
+onclick="selectPreset(this,'LIVE')">
+
+<div class="preset-icon">🎤</div>
+
+<div class="preset-text">
+
+<div class="preset-name">
+LIVE
+</div>
+
+<div class="preset-desc">
+Sensação de apresentação ao vivo.
+</div>
+
+</div>
+
+</div>
+
+
+<div
+class="preset"
+onclick="selectPreset(this,'BASS FORCE')">
+
+<div class="preset-icon">🔊</div>
+
+<div class="preset-text">
+
+<div class="preset-name">
+BASS FORCE
+</div>
+
+<div class="preset-desc">
+Graves fortes e impactantes.
+</div>
+
+</div>
+
+</div>
+
+
+<div
+class="preset"
+onclick="selectPreset(this,'CINEMA')">
+
+<div class="preset-icon">🎬</div>
+
+<div class="preset-text">
+
+<div class="preset-name">
+CINEMA
+</div>
+
+<div class="preset-desc">
+Maior sensação de imersão.
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+Equalizador
+</div>
+
+<div class="card-subtitle">
+Ajuste fino do perfil sonoro
+</div>
+
+
+<div class="eq">
+
+<div class="eq-band">
+
+<div class="eq-value" id="eq0Value">
+0 dB
+</div>
+
+<div class="eq-slider">
+
+<input
+type="range"
+min="0"
+max="100"
+value="50"
+oninput="updateEQ(0,this.value)"
+>
+
+</div>
+
+60 Hz
+
+</div>
+
+
+<div class="eq-band">
+
+<div class="eq-value" id="eq1Value">
++2 dB
+</div>
+
+<div class="eq-slider">
+
+<input
+type="range"
+min="0"
+max="100"
+value="58"
+oninput="updateEQ(1,this.value)"
+>
+
+</div>
+
+150 Hz
+
+</div>
+
+
+<div class="eq-band">
+
+<div class="eq-value" id="eq2Value">
+0 dB
+</div>
+
+<div class="eq-slider">
+
+<input
+type="range"
+min="0"
+max="100"
+value="50"
+oninput="updateEQ(2,this.value)"
+>
+
+</div>
+
+400 Hz
+
+</div>
+
+
+<div class="eq-band">
+
+<div class="eq-value" id="eq3Value">
+0 dB
+</div>
+
+<div class="eq-slider">
+
+<input
+type="range"
+min="0"
+max="100"
+value="50"
+oninput="updateEQ(3,this.value)"
+>
+
+</div>
+
+1 kHz
+
+</div>
+
+
+<div class="eq-band">
+
+<div class="eq-value" id="eq4Value">
++1 dB
+</div>
+
+<div class="eq-slider">
+
+<input
+type="range"
+min="0"
+max="100"
+value="55"
+oninput="updateEQ(4,this.value)"
+>
+
+</div>
+
+2.5 kHz
+
+</div>
+
+
+<div class="eq-band">
+
+<div class="eq-value" id="eq5Value">
++2 dB
+</div>
+
+<div class="eq-slider">
+
+<input
+type="range"
+min="0"
+max="100"
+value="58"
+oninput="updateEQ(5,this.value)"
+>
+
+</div>
+
+6 kHz
+
+</div>
+
+
+<div class="eq-band">
+
+<div class="eq-value" id="eq6Value">
++1 dB
+</div>
+
+<div class="eq-slider">
+
+<input
+type="range"
+min="0"
+max="100"
+value="55"
+oninput="updateEQ(6,this.value)"
+>
+
+</div>
+
+12 kHz
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+Balance L / R
+</div>
+
+<div class="card-subtitle">
+Controle estéreo de precisão
+</div>
+
+
+<div class="balance-wrap">
+
+<div class="balance-track">
+
+<input
+class="balance-slider"
+id="balanceSlider"
+type="range"
+min="-100"
+max="100"
+value="0"
+oninput="updateBalance(this.value)"
+>
+
+<div
+class="balance-knob"
+id="balanceKnob">
+</div>
+
+</div>
+
+
+<div class="balance-labels">
+
+<span>← ESQUERDO</span>
+
+<span>DIREITO →</span>
+
+</div>
+
+
+<div
+class="balance-center"
+id="balanceText">
+
+CENTRO • 0%
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+ENERGIA
+===================================================== -->
+
+<section class="page" id="energy">
+
+<div class="header">
+
+<div>
+<h1>Energia</h1>
+
+<div class="subtitle">
+Gerenciamento inteligente
+</div>
+
+</div>
+
+⚡
+
+</div>
+
+
+<div class="card battery-big">
+
+<div class="battery-icon">
+🔋
+</div>
+
+<div
+class="battery-percent"
+id="batteryBig">
+
+82%
+
+</div>
+
+<div
+class="card-subtitle"
+id="voltage">
+
+24,7 V
+</div>
+
+
+<div class="progress">
+
+<div
+class="progress-fill"
+id="batteryBar">
+</div>
+
+</div>
+
+
+<div class="autonomy">
+
+Autonomia estimada
+
+<strong id="runtime">
+11h 40min
+</strong>
+
+</div>
+
+</div>
+
+
+<h2 style="margin:18px 2px 7px;font-size:20px">
+Modo de energia
+</h2>
+
+<div class="subtitle" style="margin:0 2px 17px">
+O modo escolhido influencia diretamente o consumo.
+</div>
+
+
+<div
+class="power-mode"
+onclick="selectPower(this,'ECO')">
+
+<div class="power-icon">🌿</div>
+
+<div class="preset-text">
+
+<div class="preset-name">
+ECO
+</div>
+
+<div class="preset-desc">
+Máxima autonomia • menor consumo
+</div>
+
+</div>
+
+</div>
+
+
+<div
+class="power-mode active"
+onclick="selectPower(this,'BALANCE')">
+
+<div class="power-icon">⚖️</div>
+
+<div class="preset-text">
+
+<div class="preset-name">
+BALANCE
+</div>
+
+<div class="preset-desc">
+Potência e autonomia equilibradas
+</div>
+
+</div>
+
+<div class="check">✓</div>
+
+</div>
+
+
+<div
+class="power-mode"
+onclick="selectPower(this,'POWER')">
+
+<div class="power-icon">⚡</div>
+
+<div class="preset-text">
+
+<div class="preset-name">
+POWER
+</div>
+
+<div class="preset-desc">
+Alto desempenho
+</div>
+
+</div>
+
+</div>
+
+
+<div
+class="power-mode"
+onclick="selectPower(this,'BEAST MODE')">
+
+<div class="power-icon">🔥</div>
+
+<div class="preset-text">
+
+<div class="preset-name">
+BEAST MODE
+</div>
+
+<div class="preset-desc">
+Desempenho máximo
+</div>
+
+</div>
+
+</div>
+
+
+<div
+class="power-mode"
+onclick="selectPower(this,'SMART POWER')">
+
+<div class="power-icon">🧠</div>
+
+<div class="preset-text">
+
+<div class="preset-name">
+SMART POWER
+</div>
+
+<div class="preset-desc">
+Gerenciamento automático
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+MONITOR
+===================================================== -->
+
+<section class="page" id="monitor">
+
+<div class="header">
+
+<div>
+<h1>Monitoramento</h1>
+
+<div class="status">
+<span class="dot"></span>
+TEMPO REAL
+</div>
+
+</div>
+
+📊
+
+</div>
+
+
+<div class="card health">
+
+<div
+class="health-icon green"
+id="healthIcon">
+
+✓
+
+</div>
+
+<div
+class="health-title green"
+id="healthTitle">
+
+SISTEMA NORMAL
+
+</div>
+
+<div class="card-subtitle">
+Monitoramento contínuo dos sistemas
+</div>
+
+</div>
+
+
+<div class="grid2">
+
+<div class="metric">
+
+<div class="metric-icon">
+🔥
+</div>
+
+<div class="metric-name">
+Amplificador
+</div>
+
+<div
+class="metric-value green"
+id="ampTemp">
+
+42,3°C
+
+</div>
+
+<div
+class="metric-extra"
+id="ampWatts">
+
+Consumo: 58 W
+
+</div>
+
+</div>
+
+
+<div class="metric">
+
+<div class="metric-icon">
+🔋
+</div>
+
+<div class="metric-name">
+Bateria
+</div>
+
+<div
+class="metric-value green"
+id="monitorBattery">
+
+82%
+
+</div>
+
+<div
+style="font-size:10px;color:#7b8090;margin-top:5px"
+id="batteryTemp">
+
+31,2°C
+
+</div>
+
+</div>
+
+
+<div class="metric">
+
+<div class="metric-icon">
+🏠
+</div>
+
+<div class="metric-name">
+Interior
+</div>
+
+<div
+class="metric-value blue"
+id="internalTemp">
+
+29,4°C
+
+</div>
+
+</div>
+
+
+<div class="metric">
+
+<div class="metric-icon">
+🌀
+</div>
+
+<div class="metric-name">
+Ventilação
+</div>
+
+<div
+class="metric-value blue"
+id="fanValue">
+
+32%
+
+</div>
+
+<div
+class="metric-extra"
+id="fanRPM">
+
+960 RPM
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card" style="margin-top:14px">
+
+<div class="card-title">
+Histórico do amplificador
+</div>
+
+<div class="card-subtitle">
+Temperatura em tempo real
+</div>
+
+
+<div class="graph">
+
+<div class="graph-line"></div>
+<div class="graph-line l2"></div>
+<div class="graph-line l3"></div>
+
+<div class="graph-label g70">70°</div>
+<div class="graph-label g60">60°</div>
+<div class="graph-label g50">50°</div>
+<div class="graph-label g40">40°</div>
+
+
+<svg
+viewBox="0 0 400 190"
+preserveAspectRatio="none">
+
+<polyline
+id="tempLine"
+points="">
+</polyline>
+
+</svg>
+
+</div>
+
+<div
+style="display:flex;justify-content:space-between;font-size:9px;color:#7b8090">
+
+<span>Agora - 20 min</span>
+<span>Agora</span>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+Sistema elétrico
+</div>
+
+
+<div class="row">
+
+<span>🌡️ Temperatura da bateria</span>
+
+<b
+id="batteryTemp2"
+class="row-value">
+
+31,2°C
+
+</b>
+
+</div>
+
+
+<div class="row">
+
+<span>🔋 Nível da bateria</span>
+
+<b
+id="batteryLevel2"
+class="row-value green">
+
+82%
+
+</b>
+
+</div>
+
+
+<div class="row">
+
+<span>⚡ Tensão</span>
+
+<b
+id="voltage2"
+class="row-value">
+
+24,7 V
+
+</b>
+
+</div>
+
+
+<div class="row">
+
+<span>🔥 Amplificador</span>
+
+<b
+id="ampStatus"
+class="row-value green">
+
+NORMAL
+
+</b>
+
+</div>
+
+
+<div class="row">
+
+<span>🛡️ Proteção térmica</span>
+
+<b
+id="thermalStatus"
+class="row-value green">
+
+OK
+
+</b>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+MAIS
+===================================================== -->
+
+<section class="page" id="more">
+
+<div class="header">
+
+<div>
+<h1>Mais</h1>
+
+<div class="subtitle">
+Sistema e configurações
+</div>
+
+</div>
+
+⚙️
+
+</div>
+
+
+<div class="card">
+
+
+<!-- CONEXÕES -->
+
+<div
+class="setting"
+onclick="openPanel('connections',this)">
+
+<div class="setting-icon">
+📡
+</div>
+
+<div class="setting-text">
+
+<div class="setting-title">
+Conexões
+</div>
+
+<div class="setting-sub">
+Conexão inteligente com sua MHB
+</div>
+
+</div>
+
+<span class="arrow">
+›
+</span>
+
+</div>
+
+
+<div
+class="expand-panel"
+id="connections">
+
+
+<div class="connection-method">
+
+<div class="connection-method-icon">
+ᛒ
+</div>
+
+<div class="connection-info">
+
+<div class="connection-title">
+Bluetooth
+</div>
+
+<div
+class="connection-sub"
+id="btDescription">
+
+Conectado ao celular
+
+</div>
+
+</div>
+
+<div
+class="connection-state green"
+id="btState">
+
+CONECTADO
+
+</div>
+
+</div>
+
+
+<div class="connection-method">
+
+<div class="connection-method-icon">
+📶
+</div>
+
+<div class="connection-info">
+
+<div class="connection-title">
+Wi-Fi MHB
+</div>
+
+<div
+class="connection-sub"
+id="wifiDescription">
+
+Rede própria da caixinha
+
+</div>
+
+</div>
+
+<div
+class="connection-state green"
+id="wifiState">
+
+CONECTADO
+
+</div>
+
+</div>
+
+
+<div class="search-box">
+
+<div class="search-device">
+
+<div class="search-device-icon">
+🔊
+</div>
+
+<div class="search-info">
+
+<div class="search-name">
+MHB-001
+</div>
+
+<div
+class="search-desc"
+id="deviceDescription">
+
+Caixinha encontrada • sinal excelente
+
+</div>
+
+</div>
+
+<div
+class="green"
+style="font-size:9px;font-weight:bold"
+id="deviceSignal">
+
+● FORTE
+
+</div>
+
+</div>
+
+</div>
+
+
+<button
+class="power-main"
+id="connectButton"
+onclick="connectMHB()">
+
+✓ Conectado à MHB-001
+
+</button>
+
+
+<br><br>
+
+
+<button
+class="secondary-btn"
+onclick="searchMHB()">
+
+🔍 Procurar minha MHB
+
+</button>
+
+
+<br><br>
+
+
+<button
+class="secondary-btn"
+onclick="simulateDisconnect()">
+
+⚠️ Simular desconexão
+
+</button>
+
+</div>
+
+
+<!-- VENTILAÇÃO -->
+
+<div
+class="setting"
+onclick="openPanel('ventilation',this)">
+
+<div class="setting-icon">
+🌀
+</div>
+
+<div class="setting-text">
+
+<div class="setting-title">
+Ventilação
+</div>
+
+<div
+class="setting-sub"
+id="fanSetting">
+
+Controle automático
+</div>
+
+</div>
+
+<span class="arrow">
+›
+</span>
+
+</div>
+
+
+<div
+class="expand-panel"
+id="ventilation">
+
+<div class="card-title">
+Controle da ventilação
+</div>
+
+<div class="card-subtitle">
+Ajuste manual ou automático.
+</div>
+
+
+<div
+style="text-align:center;font-size:36px;font-weight:900;margin:15px"
+id="fanBig">
+
+32%
+
+</div>
+
+
+<input
+id="fanSlider"
+type="range"
+min="0"
+max="100"
+value="32"
+oninput="setFan(this.value)"
+>
+
+
+<br><br>
+
+
+<button
+class="secondary-btn"
+onclick="toggleFanMode()">
+
+Alternar automático / manual
+
+</button>
+
+
+<div
+style="margin-top:13px;font-size:10px;color:#7b8090">
+
+🛡️ A proteção térmica sempre terá prioridade.
+
+</div>
+
+</div>
+
+
+<!-- FIRMWARE -->
+
+<div
+class="setting"
+onclick="updateFirmware()">
+
+<div class="setting-icon">
+⬆️
+</div>
+
+<div class="setting-text">
+
+<div class="setting-title">
+Atualização de firmware
+</div>
+
+<div class="setting-sub">
+Versão atual 1.0.0
+</div>
+
+</div>
+
+<span class="arrow">
+›
+</span>
+
+</div>
+
+
+<!-- EQUIPAMENTO -->
+
+<div
+class="setting"
+onclick="openPanel('equipment',this)">
+
+<div class="setting-icon">
+ⓘ
+</div>
+
+<div class="setting-text">
+
+<div class="setting-title">
+Equipamento
+</div>
+
+<div class="setting-sub">
+Especificações e tecnologias
+</div>
+
+</div>
+
+<span class="arrow">
+›
+</span>
+
+</div>
+
+
+<div
+class="expand-panel"
+id="equipment">
+
+<div class="card-title">
+MHB-001
+</div>
+
+<div class="card-subtitle">
+Caixinha de Alta Qualidade
+</div>
+
+
+<div class="techs">
+
+<span class="tech">HI-FI</span>
+<span class="tech">HI-RES AUDIO</span>
+<span class="tech">LDAC</span>
+<span class="tech">DSP</span>
+<span class="tech">CLASS D</span>
+<span class="tech">WI-FI</span>
+
+</div>
+
+
+<div class="row">
+<span>Modelo</span>
+<b>MHB-001</b>
+</div>
+
+<div class="row">
+<span>Processador</span>
+<b>Tensilica Xtensa LX6</b>
+</div>
+
+<div class="row">
+<span>Processamento</span>
+<b>DSP Digital</b>
+</div>
+
+<div class="row">
+<span>Bluetooth</span>
+<b>BLE / Áudio</b>
+</div>
+
+<div class="row">
+<span>Wi-Fi</span>
+<b>Rede própria MHB</b>
+</div>
+
+<div class="row">
+<span>Entrada</span>
+<b>AUX</b>
+</div>
+
+<div class="row">
+<span>Áudio</span>
+<b>Hi-Fi / Hi-Res</b>
+</div>
+
+<div class="row">
+<span>Firmware</span>
+<b>1.0.0</b>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+NAVEGAÇÃO
+===================================================== -->
+
+<nav class="nav">
+
+<button
+class="nav-item active"
+onclick="openPage('home',this)">
+
+<span class="nav-icon">⌂</span>
+Início
+
+</button>
+
+
+<button
+class="nav-item"
+onclick="openPage('sound',this)">
+
+<span class="nav-icon">♫</span>
+Som
+
+</button>
+
+
+<button
+class="nav-item"
+onclick="openPage('energy',this)">
+
+<span class="nav-icon">🔋</span>
+Energia
+
+</button>
+
+
+<button
+class="nav-item"
+onclick="openPage('monitor',this)">
+
+<span class="nav-icon">◉</span>
+Monitor
+
+</button>
+
+
+<button
+class="nav-item"
+onclick="openPage('more',this)">
+
+<span class="nav-icon">⚙</span>
+Mais
+
+</button>
+
+</nav>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+ESTADO
+===================================================== */
+
+const S={
+
+power:true,
+connected:true,
+
+volume:60,
+
+battery:82,
+voltage:24.7,
+
+ampTemp:42.3,
+batteryTemp:31.2,
+insideTemp:29.4,
+
+fan:32,
+fanAutomatic:true,
+
+preset:"PURE HI-FI",
+powerMode:"BALANCE",
+
+eq:[
+  0,
+  2,
+  0,
+  0,
+  1,
+  2,
+  1
+]
+
+};
+
+
+/* =====================================================
+MULTIPLICADORES
+===================================================== */
+
+const powerMultiplier={
+"ECO":.55,
+"BALANCE":1,
+"POWER":1.25,
+"BEAST MODE":1.55,
+"SMART POWER":.82
+};
+
+
+const soundMultiplier={
+"PURE HI-FI":1,
+"STUDIO":1.06,
+"LIVE":1.10,
+"BASS FORCE":1.24,
+"CINEMA":1.13
+};
+
+
+/* =====================================================
+HISTÓRICO
+===================================================== */
+
+let history=[
+42,43,42,44,45,
+44,46,47,46,45,
+47,48,46,45,44,
+43,44,43,42,42
+];
+
+
+/* =====================================================
+TOAST
+===================================================== */
+
+function toast(message){
+
+const t=document.getElementById("toast");
+
+t.textContent=message;
+
+t.classList.add("show");
+
+setTimeout(()=>{
+t.classList.remove("show");
+},2200);
+
+}
+
+
+/* =====================================================
+NAVEGAÇÃO
+===================================================== */
+
+function openPage(id,btn){
+
+document
+.querySelectorAll(".page")
+.forEach(x=>{
+x.classList.remove("active");
+});
+
+document
+.getElementById(id)
+.classList.add("active");
+
+document
+.querySelectorAll(".nav-item")
+.forEach(x=>{
+x.classList.remove("active");
+});
+
+btn.classList.add("active");
+
+window.scrollTo({
+top:0,
+behavior:"smooth"
+});
+
+}
+
+
+/* =====================================================
+POWER
+===================================================== */
+
+function togglePower(){
+
+S.power=!S.power;
+
+const button=
+document.getElementById("powerButton");
+
+const chip=
+document.getElementById("stateChip");
+
+
+if(S.power){
+
+button.textContent=
+"⏻ Colocar em Standby";
+
+button.className=
+"power-main";
+
+chip.textContent=
+"ATIVO";
+
+toast("MHB-001 ligada");
+
+}else{
+
+button.textContent=
+"⏻ Ligar Caixinha";
+
+button.className=
+"power-main standby";
+
+chip.textContent=
+"STANDBY";
+
+toast("MHB-001 em standby");
+
+}
+
+}
+
+
+/* =====================================================
+VOLUME
+===================================================== */
+
+function changeVolume(value){
+
+S.volume=Number(value);
+
+document
+.getElementById("volumeValue")
+.textContent=value;
+
+}
+
+
+/* =====================================================
+EQUALIZADOR
+===================================================== */
+
+function updateEQ(index,value){
+
+/*
+50 = 0 dB
+
+Cada 5 pontos representam aproximadamente
+1 dB.
+
+Faixa:
+0   = -10 dB
+50  =   0 dB
+100 = +10 dB
+*/
+
+const db=
+(Number(value)-50)/5;
+
+S.eq[index]=db;
+
+const rounded=
+Math.round(db*10)/10;
+
+const display=
+rounded>0
+? "+"+rounded+" dB"
+: rounded+" dB";
+
+document
+.getElementById("eq"+index+"Value")
+.textContent=display;
+
+}
+
+
+/* =====================================================
+PRESETS
+===================================================== */
+
+function selectPreset(element,name){
+
+document
+.querySelectorAll(".preset")
+.forEach(p=>{
+
+p.classList.remove("active");
+
+const check=p.querySelector(".check");
+
+if(check)
+check.remove();
+
+});
+
+
+element.classList.add("active");
+
+const check=
+document.createElement("div");
+
+check.className="check";
+
+check.textContent="✓";
+
+element.appendChild(check);
+
+S.preset=name;
+
+toast("Preset: "+name);
+
+}
+
+
+/* =====================================================
+BALANCE
+===================================================== */
+
+function updateBalance(value){
+
+value=Number(value);
+
+const knob=
+document.getElementById("balanceKnob");
+
+const percent=
+(value+100)/2;
+
+knob.style.left=
+percent+"%";
+
+
+const text=
+document.getElementById("balanceText");
+
+
+if(value<-5){
+
+text.textContent=
+"ESQUERDO • "+Math.abs(value)+"%";
+
+}else if(value>5){
+
+text.textContent=
+"DIREITO • "+value+"%";
+
+}else{
+
+text.textContent=
+"CENTRO • 0%";
+
+}
+
+}
+
+
+/* =====================================================
+ENERGIA
+===================================================== */
+
+function selectPower(element,name){
+
+document
+.querySelectorAll(".power-mode")
+.forEach(p=>{
+
+p.classList.remove("active");
+
+const check=
+p.querySelector(".check");
+
+if(check)
+check.remove();
+
+});
+
+
+element.classList.add("active");
+
+const check=
+document.createElement("div");
+
+check.className="check";
+
+check.textContent="✓";
+
+element.appendChild(check);
+
+S.powerMode=name;
+
+toast("Modo de energia: "+name);
+
+}
+
+
+/* =====================================================
+PAINÉIS
+===================================================== */
+
+function openPanel(id,setting){
+
+const panel=
+document.getElementById(id);
+
+const isOpen=
+panel.classList.contains("open");
+
+
+document
+.querySelectorAll(".expand-panel")
+.forEach(p=>{
+p.classList.remove("open");
+});
+
+
+document
+.querySelectorAll(".setting")
+.forEach(s=>{
+s.classList.remove("open");
+});
+
+
+if(!isOpen){
+
+panel.classList.add("open");
+
+setting.classList.add("open");
+
+}
+
+}
+
+
+/* =====================================================
+VENTILAÇÃO
+===================================================== */
+
+function setFan(value){
+
+S.fan=Number(value);
+
+S.fanAutomatic=false;
+
+document
+.getElementById("fanBig")
+.textContent=
+value+"%";
+
+document
+.getElementById("fanValue")
+.textContent=
+value+"%";
+
+document
+.getElementById("fanSetting")
+.textContent=
+"Controle manual • "+value+"%";
+
+}
+
+
+function toggleFanMode(){
+
+S.fanAutomatic=
+!S.fanAutomatic;
+
+if(S.fanAutomatic){
+
+document
+.getElementById("fanSetting")
+.textContent=
+"Controle automático";
+
+toast(
+"Ventilação automática ativada"
+);
+
+}else{
+
+document
+.getElementById("fanSetting")
+.textContent=
+"Controle manual";
+
+toast(
+"Ventilação manual ativada"
+);
+
+}
+
+}
+
+
+/* =====================================================
+CONEXÃO
+===================================================== */
+
+function connectMHB(){
+
+const button=
+document.getElementById("connectButton");
+
+button.disabled=true;
+
+button.textContent=
+"⏳ Conectando...";
+
+
+setTimeout(()=>{
+
+S.connected=true;
+
+button.disabled=false;
+
+button.textContent=
+"✓ Conectado à MHB-001";
+
+document
+.getElementById("connectionStatus")
+.textContent=
+"CONECTADO";
+
+document
+.getElementById("btState")
+.textContent=
+"CONECTADO";
+
+document
+.getElementById("wifiState")
+.textContent=
+"CONECTADO";
+
+document
+.getElementById("btDescription")
+.textContent=
+"Conectado ao celular";
+
+document
+.getElementById("wifiDescription")
+.textContent=
+"Rede própria da caixinha";
+
+document
+.getElementById("deviceDescription")
+.textContent=
+"Caixinha encontrada • sinal excelente";
+
+toast(
+"MHB-001 conectada ✓"
+);
+
+},1400);
+
+}
+
+
+function searchMHB(){
+
+document
+.getElementById("deviceDescription")
+.textContent=
+"🔍 Procurando sua MHB...";
+
+toast(
+"Procurando dispositivos..."
+);
+
+
+setTimeout(()=>{
+
+document
+.getElementById("deviceDescription")
+.textContent=
+"MHB-001 encontrada • sinal excelente";
+
+toast(
+"MHB-001 encontrada ✓"
+);
+
+},1600);
+
+}
+
+
+function simulateDisconnect(){
+
+S.connected=false;
+
+document
+.getElementById("connectionStatus")
+.textContent=
+"DESCONECTADO";
+
+document
+.getElementById("btState")
+.textContent=
+"DESCONECTADO";
+
+document
+.getElementById("wifiState")
+.textContent=
+"DESCONECTADO";
+
+document
+.getElementById("btDescription")
+.textContent=
+"Sem conexão";
+
+document
+.getElementById("wifiDescription")
+.textContent=
+"Sem conexão";
+
+document
+.getElementById("connectButton")
+.textContent=
+"🔗 Conectar à MHB-001";
+
+toast(
+"Conexão perdida"
+);
+
+}
+
+
+/* =====================================================
+FIRMWARE
+===================================================== */
+
+function updateFirmware(){
+
+toast(
+"Procurando atualização..."
+);
+
+setTimeout(()=>{
+
+toast(
+"Firmware 1.0.0 está atualizado ✓"
+);
+
+},1800);
+
+}
+
+
+/* =====================================================
+CONSUMO
+===================================================== */
+
+function consumption(){
+
+let volume=
+.45+
+(S.volume/100)*.75;
+
+let energy=
+powerMultiplier[S.powerMode];
+
+let sound=
+soundMultiplier[S.preset];
+
+let fan=
+1+
+(S.fan/100)*.08;
+
+return volume*energy*sound*fan;
+
+}
+
+
+/* =====================================================
+POTÊNCIA DO AMPLIFICADOR
+===================================================== */
+
+function amplifierWatts(){
+
+/*
+Simulação de um amplificador com aproximadamente
+120 W de potência disponível.
+
+O consumo varia de acordo com:
+- volume
+- modo de energia
+- preset
+- ventilação
+*/
+
+const maxPower=120;
+
+let watts=
+maxPower*
+(
+0.10+
+(S.volume/100)*0.55
+);
+
+watts*=
+powerMultiplier[S.powerMode];
+
+watts*=
+soundMultiplier[S.preset];
+
+watts+=
+S.fan*0.015;
+
+return Math.min(
+maxPower,
+watts
+);
+
+}
+
+
+/* =====================================================
+RPM DO COOLER
+===================================================== */
+
+function coolerRPM(){
+
+/*
+Simulação:
+0%  = cooler parado
+25% = aproximadamente 750 RPM
+100% = aproximadamente 3000 RPM
+*/
+
+if(S.fan<=0)
+return 0;
+
+const minRPM=300;
+const maxRPM=3000;
+
+return Math.round(
+minRPM+
+(S.fan/100)*
+(maxRPM-minRPM)
+);
+
+}
+
+
+/* =====================================================
+AUTONOMIA
+===================================================== */
+
+function runtime(){
+
+const hours=
+19/
+consumption()*
+(S.battery/100);
+
+return Math.max(
+0,
+hours
+);
+
+}
+
+
+function formatTime(hours){
+
+let h=Math.floor(hours);
+
+let m=Math.floor(
+(hours-h)*60
+);
+
+return h+"h "+m+"min";
+
+}
+
+
+/* =====================================================
+GRÁFICO
+===================================================== */
+
+function drawGraph(){
+
+const width=400;
+
+const height=190;
+
+const min=35;
+
+const max=70;
+
+
+const points=
+history.map(
+(temp,index)=>{
+
+const x=
+index/
+(history.length-1)*
+width;
+
+const y=
+height-
+((temp-min)/
+(max-min))*
+height;
+
+return x+","+y;
+
+});
+
+
+document
+.getElementById("tempLine")
+.setAttribute(
+"points",
+points.join(" ")
+);
+
+}
+
+
+/* =====================================================
+SENSORES
+===================================================== */
+
+function sensors(){
+
+if(!S.power){
+
+drawGraph();
+
+return;
+
+}
+
+
+let target=
+35+
+(S.volume/100)*10;
+
+
+if(S.powerMode==="POWER")
+target+=4;
+
+if(S.powerMode==="BEAST MODE")
+target+=8;
+
+if(S.powerMode==="ECO")
+target-=4;
+
+if(S.preset==="BASS FORCE")
+target+=4;
+
+
+S.ampTemp+=
+(target-S.ampTemp)*.055;
+
+S.ampTemp+=
+(Math.random()-.5)*.7;
+
+
+/* bateria */
+
+let drain=
+.010*
+(.5+S.volume/100);
+
+drain*=
+powerMultiplier[S.powerMode];
+
+drain*=
+soundMultiplier[S.preset];
+
+S.battery-=drain;
+
+S.battery=
+Math.max(
+0,
+S.battery
+);
+
+
+/* tensão */
+
+S.voltage=
+21+
+(S.battery/100)*4.2;
+
+
+/* bateria térmica */
+
+S.batteryTemp+=
+(
+27+
+consumption()*2-
+S.batteryTemp
+)*.03;
+
+
+/* interior */
+
+S.insideTemp+=
+(
+26+
+S.ampTemp*.08-
+S.insideTemp
+)*.035;
+
+
+/* ventilação automática */
+
+if(S.fanAutomatic){
+
+if(S.ampTemp>=58){
+
+S.fan=
+Math.min(
+100,
+S.fan+4
+);
+
+}else if(S.ampTemp>=50){
+
+S.fan=
+Math.min(
+75,
+S.fan+2
+);
+
+}else{
+
+S.fan=
+Math.max(
+25,
+S.fan-1
+);
+
+}
+
+}
+
+
+/* histórico */
+
+history.push(
+S.ampTemp
+);
+
+if(history.length>20)
+history.shift();
+
+
+updateUI();
+
+drawGraph();
+
+}
+
+
+/* =====================================================
+UI
+===================================================== */
+
+function updateUI(){
+
+const battery=
+Math.round(S.battery);
+
+
+/* HOME */
+
+document
+.getElementById("homeTemp")
+.textContent=
+S.ampTemp.toFixed(1)
+.replace(".",",")+"°C";
+
+document
+.getElementById("homeBattery")
+.textContent=
+battery+"%";
+
+
+/* MONITOR */
+
+document
+.getElementById("ampTemp")
+.textContent=
+S.ampTemp.toFixed(1)
+.replace(".",",")+"°C";
+
+
+/* POTÊNCIA DO AMPLIFICADOR */
+
+document
+.getElementById("ampWatts")
+.textContent=
+"Consumo: "+
+amplifierWatts().toFixed(1)
+.replace(".",",")+
+" W";
+
+
+document
+.getElementById("monitorBattery")
+.textContent=
+battery+"%";
+
+document
+.getElementById("batteryTemp")
+.textContent=
+S.batteryTemp.toFixed(1)
+.replace(".",",")+"°C";
+
+document
+.getElementById("internalTemp")
+.textContent=
+S.insideTemp.toFixed(1)
+.replace(".",",")+"°C";
+
+document
+.getElementById("fanValue")
+.textContent=
+Math.round(S.fan)+"%";
+
+
+/* RPM */
+
+document
+.getElementById("fanRPM")
+.textContent=
+coolerRPM()+" RPM";
+
+
+document
+.getElementById("batteryTemp2")
+.textContent=
+S.batteryTemp.toFixed(1)
+.replace(".",",")+"°C";
+
+document
+.getElementById("batteryLevel2")
+.textContent=
+battery+"%";
+
+document
+.getElementById("voltage2")
+.textContent=
+S.voltage.toFixed(1)
+.replace(".",",")+" V";
+
+
+/* ENERGIA */
+
+document
+.getElementById("batteryBig")
+.textContent=
+battery+"%";
+
+document
+.getElementById("batteryBar")
+.style.width=
+S.battery+"%";
+
+document
+.getElementById("voltage")
+.textContent=
+S.voltage.toFixed(1)
+.replace(".",",")+" V";
+
+document
+.getElementById("runtime")
+.textContent=
+formatTime(runtime());
+
+
+/* COR BATERIA */
+
+const bar=
+document.getElementById("batteryBar");
+
+if(battery<=10){
+
+bar.style.background="var(--red)";
+
+}else if(battery<=20){
+
+bar.style.background="var(--yellow)";
+
+}else{
+
+bar.style.background="var(--green)";
+
+}
+
+
+/* TEMPERATURA */
+
+const amp=
+document.getElementById("ampTemp");
+
+amp.classList.remove(
+"green",
+"yellow",
+"red"
+);
+
+
+if(S.ampTemp>=60){
+
+amp.classList.add("red");
+
+}else if(S.ampTemp>=50){
+
+amp.classList.add("yellow");
+
+}else{
+
+amp.classList.add("green");
+
+}
+
+
+/* STATUS */
+
+const title=
+document.getElementById("healthTitle");
+
+const icon=
+document.getElementById("healthIcon");
+
+const thermal=
+document.getElementById("thermalStatus");
+
+const ampStatus=
+document.getElementById("ampStatus");
+
+
+if(S.ampTemp>=60){
+
+title.textContent=
+"PROTEÇÃO TÉRMICA";
+
+title.className=
+"health-title red";
+
+icon.textContent="⚠️";
+
+icon.className=
+"health-icon red";
+
+thermal.textContent=
+"ATENÇÃO";
+
+thermal.className=
+"row-value red";
+
+ampStatus.textContent=
+"LIMITADO";
+
+ampStatus.className=
+"row-value red";
+
+
+}else if(S.ampTemp>=50){
+
+title.textContent=
+"TEMPERATURA ELEVADA";
+
+title.className=
+"health-title yellow";
+
+icon.textContent="⚠";
+
+icon.className=
+"health-icon yellow";
+
+thermal.textContent=
+"MONITORANDO";
+
+thermal.className=
+"row-value yellow";
+
+ampStatus.textContent=
+"NORMAL";
+
+ampStatus.className=
+"row-value yellow";
+
+
+}else{
+
+title.textContent=
+"SISTEMA NORMAL";
+
+title.className=
+"health-title green";
+
+icon.textContent="✓";
+
+icon.className=
+"health-icon green";
+
+thermal.textContent=
+"OK";
+
+thermal.className=
+"row-value green";
+
+ampStatus.textContent=
+"NORMAL";
+
+ampStatus.className=
+"row-value green";
+
+}
+
+
+/* FAN */
+
+document
+.getElementById("fanBig")
+.textContent=
+Math.round(S.fan)+"%";
+
+document
+.getElementById("fanSlider")
+.value=
+S.fan;
+
+}
+
+
+/* =====================================================
+INICIALIZAÇÃO
+===================================================== */
+
+updateBalance(0);
+
+updateUI();
+
+drawGraph();
+
+setInterval(
+sensors,
+1000
+);
+
+</script>
+
+</body>
+</html>
