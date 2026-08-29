@@ -1,0 +1,16 @@
+{
+  "name": "MHB Audio System",
+  "short_name": "MHB Audio",
+  "description": "Sistema inteligente de controle MHB Audio System",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6f7fa",
+  "theme_color": "#5865f2",
+  "categories": [
+    "music",
+    "utilities"
+  ]
+}
